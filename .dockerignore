@@ -1,0 +1,14 @@
+.git
+.gitignore
+*.md
+frontend/node_modules
+frontend/.next
+**/build
+**/.gradle
+.env
+.env.*
+docker-compose*.yml
+k8s/
+scripts/
+Pooja_Platform_Documentation.pdf
+sonar-project.properties

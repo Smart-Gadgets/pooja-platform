@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-saffron: #FF6B00;
+    --color-temple-gold: #D4A012;
+    --color-vermillion: #E23D28;
+    --color-burgundy: #5C1A1A;
+    --color-cream: #FFF8F0;
+    --color-dark: #1A1A1A;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    color: var(--color-dark);
+    background-color: var(--color-cream);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  ::selection {
+    background-color: rgba(212, 160, 18, 0.3);
+    color: var(--color-dark);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-saffron-500 text-white font-body font-semibold 
+           rounded-lg transition-all duration-300 hover:bg-saffron-600 hover:shadow-saffron 
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 border-2 border-temple-400 text-temple-600 
+           font-body font-semibold rounded-lg transition-all duration-300 
+           hover:bg-temple-400 hover:text-white active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-burgundy-600 font-body font-medium 
+           rounded-lg transition-all duration-200 hover:bg-burgundy-50;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-warm border border-saffron-100/50 overflow-hidden 
+           transition-all duration-300 hover:shadow-warm-lg hover:-translate-y-1;
+  }
+
+  .card-flat {
+    @apply bg-white rounded-2xl border border-saffron-100/50 overflow-hidden;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg border border-saffron-200 bg-white font-body text-sm
+           placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-temple-400/50 
+           focus:border-temple-400 transition-all duration-200;
+  }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl font-semibold text-burgundy-700 tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply font-body text-lg text-burgundy-400 mt-3;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-saffron {
+    @apply badge bg-saffron-100 text-saffron-700;
+  }
+
+  .badge-temple {
+    @apply badge bg-temple-100 text-temple-700;
+  }
+
+  .badge-vermillion {
+    @apply badge bg-vermillion-100 text-vermillion-700;
+  }
+
+  .divider-ornament {
+    @apply flex items-center gap-4 my-8;
+  }
+
+  .divider-ornament::before,
+  .divider-ornament::after {
+    content: '';
+    @apply flex-1 h-px bg-gradient-to-r from-transparent via-temple-300 to-transparent;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md rounded-2xl border border-white/50 shadow-warm;
+  }
+
+  .text-gradient-saffron {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-saffron-500 via-temple-400 to-vermillion-500;
+  }
+}
+
+@layer utilities {
+  .animate-stagger-1 { animation-delay: 0.1s; }
+  .animate-stagger-2 { animation-delay: 0.2s; }
+  .animate-stagger-3 { animation-delay: 0.3s; }
+  .animate-stagger-4 { animation-delay: 0.4s; }
+  .animate-stagger-5 { animation-delay: 0.5s; }
+}
+
+/* Ornamental pattern overlay */
+.ornament-overlay {
+  position: relative;
+}
+.ornament-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A012' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FFF8F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #D4A012;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8860B;
+}
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

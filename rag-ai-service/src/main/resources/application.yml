@@ -1,0 +1,50 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: rag-ai-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:pooja_db}
+    username: ${DB_USER:pooja}
+    password: ${DB_PASSWORD:pooja_secret}
+  flyway:
+    enabled: true
+    schemas: rag
+    locations: classpath:db/migration
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:sk-placeholder-replace-with-real-key}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.3
+      embedding:
+        options:
+          model: text-embedding-3-small
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        schema-name: rag
+        dimensions: 1536
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        remove-existing-vector-store-table: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    consumer:
+      group-id: rag-ai-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+
+logging:
+  level:
+    com.pooja.rag: DEBUG
+    org.springframework.ai: INFO

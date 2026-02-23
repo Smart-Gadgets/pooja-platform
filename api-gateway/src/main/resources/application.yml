@@ -1,0 +1,106 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-auth-service
+          uri: http://user-auth-service:8081
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: authCB
+                fallbackUri: forward:/fallback/auth
+
+        - id: product-service
+          uri: http://product-service:8082
+          predicates:
+            - Path=/api/v1/products/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productCB
+
+        - id: pandit-service
+          uri: http://pandit-service:8083
+          predicates:
+            - Path=/api/v1/pandits/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: panditCB
+
+        - id: order-service
+          uri: http://order-service:8084
+          predicates:
+            - Path=/api/v1/orders/**, /api/v1/bookings/**, /api/v1/cart/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderCB
+
+        - id: rag-ai-service
+          uri: http://rag-ai-service:8085
+          predicates:
+            - Path=/api/v1/ai/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: ragCB
+
+        - id: payment-service
+          uri: http://payment-service:8086
+          predicates:
+            - Path=/api/v1/payments/**
+
+        - id: notification-service
+          uri: http://notification-service:8087
+          predicates:
+            - Path=/api/v1/notifications/**
+
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 50
+            redis-rate-limiter.burstCapacity: 100
+            key-resolver: "#{@ipKeyResolver}"
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+
+jwt:
+  secret: ${JWT_SECRET:pooja-platform-super-secret-key-change-in-production-minimum-256-bits-long}
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.pooja.gateway: DEBUG

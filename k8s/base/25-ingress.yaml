@@ -1,0 +1,36 @@
+# Optional: Nginx Ingress for single-domain routing
+# Requires: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+#
+# With this, access everything at http://pooja.local:
+#   /           → frontend (Next.js)
+#   /api/*      → api-gateway (Spring Cloud Gateway)
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pooja-platform-ingress
+  namespace: pooja-platform
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: pooja.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
