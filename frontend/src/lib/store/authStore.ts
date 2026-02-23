@@ -30,14 +30,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     const data = await authApi.login(email, password);
     Cookies.set('access_token', data.accessToken, { expires: 1 / 24 });
     Cookies.set('refresh_token', data.refreshToken, { expires: 7 });
-    set({ user: data.user, isAuthenticated: true, isLoading: false });
+    const u = data.user;
+    set({ user: { id: u.id, name: u.fullName || u.name, email: u.email, phone: u.phone, role: u.role, avatarUrl: u.avatarUrl }, isAuthenticated: true, isLoading: false });
   },
 
   register: async (formData) => {
     const data = await authApi.register(formData);
     Cookies.set('access_token', data.accessToken, { expires: 1 / 24 });
     Cookies.set('refresh_token', data.refreshToken, { expires: 7 });
-    set({ user: data.user, isAuthenticated: true, isLoading: false });
+    const u = data.user;
+    set({ user: { id: u.id, name: u.fullName || u.name, email: u.email, phone: u.phone, role: u.role, avatarUrl: u.avatarUrl }, isAuthenticated: true, isLoading: false });
   },
 
   logout: () => {
@@ -53,8 +55,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
     try {
-      const user = await authApi.getProfile();
-      set({ user, isAuthenticated: true, isLoading: false });
+      const u = await authApi.getProfile();
+      set({ user: { id: u.id, name: u.fullName || u.name, email: u.email, phone: u.phone, role: u.role, avatarUrl: u.avatarUrl }, isAuthenticated: true, isLoading: false });
     } catch {
       Cookies.remove('access_token');
       Cookies.remove('refresh_token');

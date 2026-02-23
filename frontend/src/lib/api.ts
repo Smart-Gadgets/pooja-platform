@@ -117,7 +117,7 @@ export const authApi = {
   }) =>
     apiRequest<any>('/api/v1/auth/register', {
       method: 'POST',
-      body: data,
+      body: { fullName: data.name, email: data.email, phone: data.phone, password: data.password, role: data.role },
       auth: false,
     }),
 
@@ -125,6 +125,13 @@ export const authApi = {
 
   updateProfile: (data: any) =>
     apiRequest<any>('/api/v1/auth/profile', { method: 'PUT', body: data }),
+
+  // Admin endpoints
+  listUsers: (page = 0, size = 20, role?: string) =>
+    apiRequest<any>(`/api/v1/auth/users?page=${page}&size=${size}${role ? `&role=${role}` : ''}`),
+
+  approveUser: (userId: string) =>
+    apiRequest<any>(`/api/v1/auth/users/${userId}/approve`, { method: 'POST' }),
 };
 
 // ==================== PRODUCTS API ====================
@@ -150,6 +157,17 @@ export const productsApi = {
 
   update: (id: string, data: any) =>
     apiRequest<any>(`/api/v1/products/${id}`, { method: 'PUT', body: data }),
+
+  // Seller endpoints
+  getMyProducts: (page = 0, size = 20) =>
+    apiRequest<any>(`/api/v1/products/seller/my-products?page=${page}&size=${size}`),
+
+  // Admin endpoints
+  approveProduct: (id: string) =>
+    apiRequest<any>(`/api/v1/products/${id}/approve`, { method: 'POST' }),
+
+  rejectProduct: (id: string) =>
+    apiRequest<any>(`/api/v1/products/${id}/reject`, { method: 'POST' }),
 };
 
 // ==================== PANDITS API ====================
@@ -169,6 +187,19 @@ export const panditsApi = {
 
   getContent: (panditId: string) =>
     apiRequest<any>(`/api/v1/pandits/public/${panditId}/content`, { auth: false }),
+
+  // Authenticated pandit endpoints
+  getMyProfile: () => apiRequest<any>('/api/v1/pandits/me'),
+
+  createProfile: (data: any) =>
+    apiRequest<any>('/api/v1/pandits', { method: 'POST', body: data }),
+
+  updateProfile: (data: any) =>
+    apiRequest<any>('/api/v1/pandits', { method: 'PUT', body: data }),
+
+  // Admin endpoints
+  verifyPandit: (id: string) =>
+    apiRequest<any>(`/api/v1/pandits/${id}/verify`, { method: 'POST' }),
 };
 
 // ==================== ORDERS API ====================
@@ -194,7 +225,18 @@ export const ordersApi = {
   createBooking: (data: any) =>
     apiRequest<any>('/api/v1/orders/bookings', { method: 'POST', body: data }),
 
-  getBookings: () => apiRequest<any>('/api/v1/orders/bookings'),
+  getBookings: () => apiRequest<any>('/api/v1/bookings'),
+
+  // Admin endpoints
+  updateOrderStatus: (id: string, status: string) =>
+    apiRequest<any>(`/api/v1/orders/${id}/status?status=${status}`, { method: 'PATCH' }),
+
+  updateBookingStatus: (id: string, status: string) =>
+    apiRequest<any>(`/api/v1/bookings/${id}/status?status=${status}`, { method: 'PATCH' }),
+
+  // Pandit bookings
+  getPanditBookings: (panditId: string) =>
+    apiRequest<any>(`/api/v1/bookings/pandit/${panditId}`),
 };
 
 // ==================== PAYMENTS API ====================

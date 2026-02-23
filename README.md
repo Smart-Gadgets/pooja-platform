@@ -108,7 +108,23 @@ pooja-platform/
 
 ---
 
-## 3. Quick Start (Docker Compose)
+## 3. Quick Start
+
+### Demo Accounts
+
+After starting the platform, these accounts are automatically seeded:
+
+| Role | Email | Password | Dashboard Features |
+|------|-------|----------|-------------------|
+| **👑 Admin** | `admin@pooja.com` | `admin123` | User management, product approval, pandit verification, order management |
+| **🙏 Customer** | `customer@pooja.com` | `customer123` | Order history, bookings, cart, AI guide |
+| **🏪 Seller** | `seller@pooja.com` | `seller123` | Product management, revenue tracking, order fulfillment |
+| **🙏 Pandit** | `pandit@pooja.com` | `pandit123` | Booking management, profile, content, earnings |
+| **🏪 Seller 2** | `seller2@pooja.com` | `seller123` | Same as Seller |
+| **🙏 Pandit 2** | `pandit2@pooja.com` | `pandit123` | Same as Pandit |
+
+> **Login:** Go to `http://localhost:3000/auth/login` — click any demo account button to auto-fill credentials.
+> **Dashboard:** After login, you're redirected to `/dashboard` which shows a role-specific view. (Docker Compose)
 
 **If you just want to get everything running fast, do this:**
 
