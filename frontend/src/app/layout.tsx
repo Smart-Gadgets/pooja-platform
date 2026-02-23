@@ -1,15 +1,18 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from 'react-hot-toast';
+
+export const viewport: Viewport = {
+  themeColor: '#FF6B00',
+};
 
 export const metadata: Metadata = {
   title: 'Pooja Platform — Your Sacred Marketplace',
   description: 'Discover authentic pooja items, connect with verified pandits, and explore Hindu rituals with AI-powered guidance. Your one-stop spiritual marketplace.',
   keywords: ['pooja', 'hindu', 'puja', 'pandit', 'spiritual', 'marketplace', 'rituals'],
   manifest: '/manifest.json',
-  themeColor: '#FF6B00',
   openGraph: {
     title: 'Pooja Platform — Your Sacred Marketplace',
     description: 'Authentic pooja items & verified pandits for all your spiritual needs.',

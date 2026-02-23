@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { SAMPLE_PRODUCTS, CATEGORIES } from '@/lib/sampleData';
 import { productsApi } from '@/lib/api';
 import type { Product } from '@/lib/types';
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryFilter = searchParams.get('category');
   const [products, setProducts] = useState<Product[]>(SAMPLE_PRODUCTS);
@@ -190,5 +190,40 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ProductsLoading() {
+  return (
+    <div className="min-h-screen bg-cream-50">
+      <div className="bg-white border-b border-saffron-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="h-8 w-48 shimmer rounded mb-2" />
+          <div className="h-4 w-80 shimmer rounded" />
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="card-flat overflow-hidden">
+              <div className="aspect-[4/3] shimmer" />
+              <div className="p-5 space-y-3">
+                <div className="h-4 w-3/4 shimmer rounded" />
+                <div className="h-3 w-full shimmer rounded" />
+                <div className="h-6 w-1/3 shimmer rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsLoading />}>
+      <ProductsContent />
+    </Suspense>
   );
 }
