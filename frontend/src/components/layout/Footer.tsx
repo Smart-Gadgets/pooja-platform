@@ -16,7 +16,8 @@ const FOOTER_LINKS = {
     { href: '/about', label: 'Ritual Guides' },
   ],
   company: [
-    { href: '/about', label: 'About Us' },
+    { href: '/about', label: 'About</Link>
+              <Link href="/docs" className="text-sm text-burgundy-400 hover:text-saffron-600 transition-colors">Documentation Us' },
     { href: '/about#contact', label: 'Contact' },
     { href: '/about#careers', label: 'Careers' },
     { href: '/about#blog', label: 'Blog' },

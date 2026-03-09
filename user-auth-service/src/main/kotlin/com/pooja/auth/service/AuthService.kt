@@ -54,7 +54,6 @@ class AuthService(
         )
 
         eventPublisher.publishUserCreated(user)
-
         return buildAuthResponse(user)
     }
 
@@ -120,12 +119,49 @@ class AuthService(
 
     @Transactional
     fun approveUser(userId: UUID): UserResponse {
-        val user = userRepository.findById(userId)
-            .orElseThrow { AuthException("User not found") }
+        val user = findUser(userId)
         user.status = UserStatus.ACTIVE
         val updated = userRepository.save(user)
         eventPublisher.publishUserApproved(updated)
         return updated.toResponse()
+    }
+
+    @Transactional
+    fun suspendUser(userId: UUID): UserResponse {
+        val user = findUser(userId)
+        user.status = UserStatus.SUSPENDED
+        val updated = userRepository.save(user)
+        return updated.toResponse()
+    }
+
+    @Transactional
+    fun activateUser(userId: UUID): UserResponse {
+        val user = findUser(userId)
+        user.status = UserStatus.ACTIVE
+        val updated = userRepository.save(user)
+        return updated.toResponse()
+    }
+
+    @Transactional
+    fun deleteUser(userId: UUID) {
+        val user = findUser(userId)
+        if (user.role == UserRole.ADMIN) {
+            throw AuthException("Cannot delete admin users")
+        }
+        userRepository.delete(user)
+    }
+
+    @Transactional
+    fun changeUserRole(userId: UUID, newRole: UserRole): UserResponse {
+        val user = findUser(userId)
+        user.role = newRole
+        val updated = userRepository.save(user)
+        return updated.toResponse()
+    }
+
+    private fun findUser(userId: UUID): User {
+        return userRepository.findById(userId)
+            .orElseThrow { AuthException("User not found") }
     }
 
     private fun buildAuthResponse(user: User): AuthResponse {

@@ -7,10 +7,23 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [filter, setFilter] = useState('ALL');
   const [search, setSearch] = useState('');
+  const [actionModal, setActionModal] = useState<any>(null);
 
   const load = () => authApi.listUsers(0, 200).then(d => setUsers(d?.content || [])).catch(() => {});
   useEffect(() => { load(); }, []);
-  const approve = async (id: string) => { try { await authApi.approveUser(id); toast.success('Approved'); load(); } catch { toast.error('Failed'); } };
+
+  const handleAction = async (action: string, userId: string, extra?: string) => {
+    try {
+      switch (action) {
+        case 'approve': await authApi.approveUser(userId); toast.success('User approved'); break;
+        case 'suspend': await authApi.suspendUser(userId); toast.success('User suspended'); break;
+        case 'activate': await authApi.activateUser(userId); toast.success('User activated'); break;
+        case 'delete': await authApi.deleteUser(userId); toast.success('User deleted'); break;
+        case 'role': if (extra) { await authApi.changeUserRole(userId, extra); toast.success(`Role changed to ${extra}`); } break;
+      }
+      setActionModal(null); load();
+    } catch (err: any) { toast.error(err.message || 'Action failed'); }
+  };
 
   const list = users.filter(u => {
     if (filter !== 'ALL' && u.role !== filter && u.status !== filter) return false;
@@ -19,7 +32,7 @@ export default function AdminUsersPage() {
   });
 
   const badge = (role: string) => ({ ADMIN: 'bg-violet-100 text-violet-700', SELLER: 'bg-emerald-100 text-emerald-700', PANDIT: 'bg-amber-100 text-amber-700', CUSTOMER: 'bg-blue-100 text-blue-700' }[role] || 'bg-gray-100 text-gray-700');
-  const sbadge = (s: string) => ({ ACTIVE: 'bg-green-100 text-green-700', PENDING_APPROVAL: 'bg-amber-100 text-amber-700', SUSPENDED: 'bg-red-100 text-red-700' }[s] || 'bg-gray-100 text-gray-700');
+  const sbadge = (s: string) => ({ ACTIVE: 'bg-green-100 text-green-700', PENDING_APPROVAL: 'bg-amber-100 text-amber-700', SUSPENDED: 'bg-red-100 text-red-700', INACTIVE: 'bg-gray-100 text-gray-600' }[s] || 'bg-gray-100 text-gray-700');
 
   return (
     <div>
@@ -27,10 +40,10 @@ export default function AdminUsersPage() {
       <p className="text-slate-500 text-sm mb-6">{users.length} registered users</p>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <input type="text" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)}
+        <input type="text" placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)}
           className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
         <div className="flex gap-1.5 flex-wrap">
-          {['ALL', 'ADMIN', 'SELLER', 'PANDIT', 'CUSTOMER', 'PENDING_APPROVAL'].map(f => (
+          {['ALL', 'ADMIN', 'SELLER', 'PANDIT', 'CUSTOMER', 'PENDING_APPROVAL', 'SUSPENDED'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${filter === f ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'}`}>
               {f === 'ALL' ? 'All' : f.replace('_', ' ')}
@@ -59,13 +72,32 @@ export default function AdminUsersPage() {
                 <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge(u.role)}`}>{u.role}</span></td>
                 <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${sbadge(u.status)}`}>{u.status?.replace('_', ' ')}</span></td>
                 <td className="px-5 py-3 text-right">
-                  {u.status === 'PENDING_APPROVAL' && <button onClick={() => approve(u.id)} className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs hover:bg-green-700">Approve</button>}
+                  <div className="flex gap-1.5 justify-end items-center">
+                    {u.status === 'PENDING_APPROVAL' && <button onClick={() => handleAction('approve', u.id)} className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs hover:bg-green-700">Approve</button>}
+                    {u.status === 'ACTIVE' && u.role !== 'ADMIN' && <button onClick={() => handleAction('suspend', u.id)} className="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 text-xs hover:bg-amber-200">Suspend</button>}
+                    {u.status === 'SUSPENDED' && <button onClick={() => handleAction('activate', u.id)} className="px-3 py-1.5 rounded-lg bg-green-100 text-green-700 text-xs hover:bg-green-200">Activate</button>}
+
+                    {/* Role change dropdown */}
+                    {u.role !== 'ADMIN' && (
+                      <select defaultValue="" onChange={e => { if (e.target.value) handleAction('role', u.id, e.target.value); e.target.value = ''; }}
+                        className="px-2 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600 bg-white cursor-pointer">
+                        <option value="" disabled>Change role...</option>
+                        {['CUSTOMER', 'SELLER', 'PANDIT'].filter(r => r !== u.role).map(r => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                    )}
+
+                    {/* Delete */}
+                    {u.role !== 'ADMIN' && (
+                      <button onClick={() => { if (confirm(`Delete ${u.fullName || u.name}? This cannot be undone.`)) handleAction('delete', u.id); }}
+                        className="px-3 py-1.5 rounded-lg bg-red-100 text-red-600 text-xs hover:bg-red-200">Delete</button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {list.length === 0 && <div className="p-12 text-center text-slate-400 text-sm">No users match your filter</div>}
+        {list.length === 0 && <div className="p-12 text-center text-slate-400 text-sm">No users match your criteria</div>}
       </div>
     </div>
   );

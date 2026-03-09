@@ -20,10 +20,12 @@ export default function PanditLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => { loadUser(); }, [loadUser]);
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.replace('/auth/login');
-    if (!isLoading && user && user.role !== 'PANDIT') router.replace('/dashboard');
+    if (!isLoading && !isAuthenticated && !pathname.includes('/login')) router.replace('/pandit/login');
+    if (!isLoading && user && user.role !== 'PANDIT' && !pathname.includes('/login')) router.replace('/dashboard');
   }, [isLoading, isAuthenticated, user, router]);
 
+  // Login pages render without sidebar
+  if (pathname.includes('/login')) return <>{children}</>;
   if (isLoading || !user) return <div className="min-h-screen flex items-center justify-center bg-amber-50"><div className="animate-pulse text-4xl">🪔</div></div>;
 
   const isActive = (item: any) => item.exact ? pathname === item.href : pathname.startsWith(item.href);

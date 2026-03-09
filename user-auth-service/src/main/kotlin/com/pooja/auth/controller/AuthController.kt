@@ -2,6 +2,7 @@ package com.pooja.auth.controller
 
 import com.pooja.auth.dto.*
 import com.pooja.auth.model.UserRole
+import com.pooja.auth.model.UserStatus
 import com.pooja.auth.service.AuthService
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -46,6 +47,8 @@ class AuthController(private val authService: AuthService) {
         return ResponseEntity.ok(authService.updateProfile(UUID.fromString(userId), request))
     }
 
+    // === Admin Endpoints ===
+
     @GetMapping("/users")
     fun listUsers(
         @RequestParam(required = false) role: UserRole?,
@@ -57,5 +60,29 @@ class AuthController(private val authService: AuthService) {
     @PostMapping("/users/{userId}/approve")
     fun approveUser(@PathVariable userId: UUID): ResponseEntity<UserResponse> {
         return ResponseEntity.ok(authService.approveUser(userId))
+    }
+
+    @PostMapping("/users/{userId}/suspend")
+    fun suspendUser(@PathVariable userId: UUID): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(authService.suspendUser(userId))
+    }
+
+    @PostMapping("/users/{userId}/activate")
+    fun activateUser(@PathVariable userId: UUID): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(authService.activateUser(userId))
+    }
+
+    @DeleteMapping("/users/{userId}")
+    fun deleteUser(@PathVariable userId: UUID): ResponseEntity<Void> {
+        authService.deleteUser(userId)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PutMapping("/users/{userId}/role")
+    fun changeUserRole(
+        @PathVariable userId: UUID,
+        @RequestParam role: UserRole
+    ): ResponseEntity<UserResponse> {
+        return ResponseEntity.ok(authService.changeUserRole(userId, role))
     }
 }

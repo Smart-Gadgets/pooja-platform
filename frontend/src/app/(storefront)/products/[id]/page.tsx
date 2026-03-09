@@ -21,8 +21,12 @@ export default function ProductDetailPage() {
   useEffect(() => {
     setLoading(true);
     productsApi.getById(id as string)
-      .then((data) => setProduct(data))
+      .then((data) => {
+        if (data && data.name) setProduct(data);
+        else throw new Error('Invalid product data');
+      })
       .catch(() => {
+        // Fallback to sample data when API unavailable or product not in DB
         const sample = SAMPLE_PRODUCTS.find((p) => p.id === id);
         if (sample) setProduct(sample);
       })

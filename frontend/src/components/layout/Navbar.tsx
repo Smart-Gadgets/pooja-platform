@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '/pandits', label: 'Find Pandit' },
   { href: '/ai-assistant', label: 'AI Guide' },
   { href: '/about', label: 'About' },
+  { href: '/docs', label: 'Docs' },
 ];
 
 export default function Navbar() {
