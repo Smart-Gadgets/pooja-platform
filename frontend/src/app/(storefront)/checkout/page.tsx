@@ -13,21 +13,17 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [address, setAddress] = useState({ line1: '', line2: '', city: '', state: '', pincode: '', phone: '' });
   const [loading, setLoading] = useState(false);
+
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
+    if (!isAuthenticated) { router.push('/auth/login'); return; }
     loadCart();
     setReady(true);
   }, [isAuthenticated, loadCart, router]);
 
   useEffect(() => {
-    if (ready && items.length === 0) {
-      router.push('/cart');
-    }
+    if (ready && items.length === 0) router.push('/cart');
   }, [ready, items.length, router]);
 
   const shipping = totalPrice >= 499 ? 0 : 49;
@@ -52,10 +48,14 @@ export default function CheckoutPage() {
     }
   };
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   if (!ready || items.length === 0) {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-saffron-500"></div>
+        <div className="animate-pulse text-4xl">🪔</div>
       </div>
     );
   }

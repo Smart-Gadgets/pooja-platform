@@ -1,10 +1,16 @@
 'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
+
+const DEMOS = [
+  { email: 'admin@pooja.com', pw: 'admin123', label: '👑 Admin', sub: 'Full platform control', color: 'border-violet-200 bg-violet-50 hover:border-violet-400' },
+  { email: 'customer@pooja.com', pw: 'customer123', label: '🙏 Customer', sub: 'Shopping experience', color: 'border-blue-200 bg-blue-50 hover:border-blue-400' },
+  { email: 'seller@pooja.com', pw: 'seller123', label: '🏪 Seller', sub: 'Product management', color: 'border-emerald-200 bg-emerald-50 hover:border-emerald-400' },
+  { email: 'pandit@pooja.com', pw: 'pandit123', label: '🙏 Pandit', sub: 'Booking management', color: 'border-amber-200 bg-amber-50 hover:border-amber-400' },
+];
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -19,66 +25,60 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const { user } = useAuthStore.getState();
-      toast.success('Welcome back!');
+      toast.success(`Welcome back, ${user?.name}!`);
       switch (user?.role) {
         case 'ADMIN': router.push('/admin'); break;
         case 'SELLER': router.push('/seller'); break;
         case 'PANDIT': router.push('/pandit'); break;
         default: router.push('/'); break;
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Invalid email or password');
-    } finally { setLoading(false); }
+    } catch (err: any) { toast.error(err.message || 'Invalid credentials'); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-cream-50 flex items-center justify-center px-4 py-16">
+    <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-gradient-to-br from-cream-50 to-saffron-50/30">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-5xl block mb-4">🪔</span>
           <h1 className="font-display text-3xl font-bold text-burgundy-800">Welcome Back</h1>
-          <p className="text-burgundy-400 mt-2">Sign in to your Pooja Platform account</p>
+          <p className="text-burgundy-400 mt-2">Sign in to continue</p>
         </div>
 
-        <div className="card-flat p-8">
+        <div className="bg-white rounded-2xl shadow-xl shadow-saffron-500/5 border border-saffron-100 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="text-sm font-medium text-burgundy-600 mb-1.5 block">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required className="input-field" />
+              <label className="text-sm font-medium text-gray-700 mb-1.5 block">Email</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-sm" />
             </div>
             <div>
-              <label className="text-sm font-medium text-burgundy-600 mb-1.5 block">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required className="input-field" />
+              <label className="text-sm font-medium text-gray-700 mb-1.5 block">Password</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-sm" />
             </div>
-            <button type="submit" disabled={loading} className="btn-primary w-full !py-3.5">
+            <button type="submit" disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-saffron-500 to-saffron-600 text-white font-semibold hover:shadow-lg hover:shadow-saffron-500/20 transition-all disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
+          <p className="text-center text-sm text-gray-500 mt-5">
+            New here? <Link href="/auth/register" className="text-saffron-600 font-medium hover:underline">Create account</Link>
+          </p>
+        </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-burgundy-400">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/register" className="text-saffron-600 font-medium hover:underline">Create one</Link>
-            </p>
-          </div>
-
-          {/* Demo credentials */}
-          <div className="mt-6 pt-6 border-t border-saffron-100">
-            <p className="text-xs text-burgundy-400 text-center mb-3">Quick login with demo accounts:</p>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { email: 'admin@pooja.com', pw: 'admin123', label: '👑 Admin', color: 'bg-purple-50 text-purple-700 hover:bg-purple-100' },
-                { email: 'customer@pooja.com', pw: 'customer123', label: '🙏 Customer', color: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
-                { email: 'seller@pooja.com', pw: 'seller123', label: '🏪 Seller', color: 'bg-green-50 text-green-700 hover:bg-green-100' },
-                { email: 'pandit@pooja.com', pw: 'pandit123', label: '🙏 Pandit', color: 'bg-orange-50 text-orange-700 hover:bg-orange-100' },
-              ].map((cred) => (
-                <button key={cred.email} type="button" onClick={() => { setEmail(cred.email); setPassword(cred.pw); }}
-                  className={`px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${cred.color}`}>
-                  <span className="block">{cred.label}</span>
-                  <span className="block font-mono text-[10px] opacity-70 mt-0.5">{cred.email}</span>
-                </button>
-              ))}
-            </div>
+        {/* Demo accounts */}
+        <div className="mt-8">
+          <p className="text-center text-xs text-gray-400 mb-3">Quick login — tap to fill credentials</p>
+          <div className="grid grid-cols-2 gap-2">
+            {DEMOS.map(d => (
+              <button key={d.email} onClick={() => { setEmail(d.email); setPassword(d.pw); }}
+                className={`p-3 rounded-xl border text-left transition-all ${d.color}`}>
+                <span className="text-sm font-medium block">{d.label}</span>
+                <span className="text-[10px] text-gray-500 block mt-0.5">{d.sub}</span>
+                <span className="text-[10px] font-mono text-gray-400 block mt-1">{d.email}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
