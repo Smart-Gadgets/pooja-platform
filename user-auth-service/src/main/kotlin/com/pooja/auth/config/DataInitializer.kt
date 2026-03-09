@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.core.annotation.Order
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 @Order(1)
@@ -20,6 +21,7 @@ class DataInitializer(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @Transactional
     override fun run(args: ApplicationArguments?) {
         val demoUsers = listOf(
             DemoUser("admin@pooja.com", "admin123", "Platform Admin", UserRole.ADMIN, "+91-9000000001"),
@@ -36,8 +38,10 @@ class DataInitializer(
         )
 
         var created = 0
+        var updated = 0
         for (demo in demoUsers) {
-            if (!userRepository.existsByEmail(demo.email)) {
+            val existing = userRepository.findByEmail(demo.email)
+            if (existing == null) {
                 userRepository.save(
                     User(
                         email = demo.email,
@@ -54,13 +58,18 @@ class DataInitializer(
                 )
                 created++
                 log.info("Created demo user: {} ({})", demo.email, demo.role)
+            } else if (!passwordEncoder.matches(demo.password, existing.passwordHash)) {
+                // User exists but password hash doesn't match — fix it
+                // This handles the case where V1 migration inserted a stale/wrong BCrypt hash
+                existing.passwordHash = passwordEncoder.encode(demo.password)
+                existing.status = UserStatus.ACTIVE
+                userRepository.save(existing)
+                updated++
+                log.info("Updated password for demo user: {} ({})", demo.email, demo.role)
             }
         }
-        if (created > 0) {
-            log.info("Seeded {} demo users", created)
-        } else {
-            log.info("All demo users already exist")
-        }
+        log.info("DataInitializer complete: {} created, {} updated, {} unchanged",
+            created, updated, demoUsers.size - created - updated)
     }
 
     private data class DemoUser(
