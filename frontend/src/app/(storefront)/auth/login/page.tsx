@@ -5,12 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
 
-const DEMOS = [
-  { email: 'admin@pooja.com', pw: 'admin123', label: '👑 Admin', sub: 'Full platform control', color: 'border-violet-200 bg-violet-50 hover:border-violet-400' },
-  { email: 'customer@pooja.com', pw: 'customer123', label: '🙏 Customer', sub: 'Shopping experience', color: 'border-blue-200 bg-blue-50 hover:border-blue-400' },
-  { email: 'seller@pooja.com', pw: 'seller123', label: '🏪 Seller', sub: 'Product management', color: 'border-emerald-200 bg-emerald-50 hover:border-emerald-400' },
-  { email: 'pandit@pooja.com', pw: 'pandit123', label: '🙏 Pandit', sub: 'Booking management', color: 'border-amber-200 bg-amber-50 hover:border-amber-400' },
-];
+const DEMO_CUSTOMER = { email: 'customer@pooja.com', pw: 'customer123' };
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -25,13 +20,14 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const { user } = useAuthStore.getState();
-      toast.success(`Welcome back, ${user?.name}!`);
-      switch (user?.role) {
-        case 'ADMIN': router.push('/admin'); break;
-        case 'SELLER': router.push('/seller'); break;
-        case 'PANDIT': router.push('/pandit'); break;
-        default: router.push('/'); break;
+      // Validate that user is a customer
+      if (user?.role !== 'CUSTOMER') {
+        toast.error('This portal is for customers only. Please use the appropriate login portal for your role.');
+        useAuthStore.getState().logout();
+        return;
       }
+      toast.success(`Welcome back, ${user?.name}!`);
+      router.push('/');
     } catch (err: any) { toast.error(err.message || 'Invalid credentials'); }
     finally { setLoading(false); }
   };
@@ -42,7 +38,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <span className="text-5xl block mb-4">🪔</span>
           <h1 className="font-display text-3xl font-bold text-burgundy-800">Welcome Back</h1>
-          <p className="text-burgundy-400 mt-2">Sign in to continue</p>
+          <p className="text-burgundy-400 mt-2">Customer Portal - Sign in to continue shopping</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl shadow-saffron-500/5 border border-saffron-100 p-8">
@@ -67,18 +63,24 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Demo accounts */}
+        {/* Demo account for customers only */}
         <div className="mt-8">
-          <p className="text-center text-xs text-gray-400 mb-3">Quick login — tap to fill credentials</p>
-          <div className="grid grid-cols-2 gap-2">
-            {DEMOS.map(d => (
-              <button key={d.email} onClick={() => { setEmail(d.email); setPassword(d.pw); }}
-                className={`p-3 rounded-xl border text-left transition-all ${d.color}`}>
-                <span className="text-sm font-medium block">{d.label}</span>
-                <span className="text-[10px] text-gray-500 block mt-0.5">{d.sub}</span>
-                <span className="text-[10px] font-mono text-gray-400 block mt-1">{d.email}</span>
-              </button>
-            ))}
+          <p className="text-center text-xs text-gray-400 mb-3">Demo customer account</p>
+          <button onClick={() => { setEmail(DEMO_CUSTOMER.email); setPassword(DEMO_CUSTOMER.pw); }}
+            className="w-full p-3 rounded-xl border border-blue-200 bg-blue-50 hover:border-blue-400 text-left transition-all">
+            <span className="text-sm font-medium block">🙏 Customer Demo</span>
+            <span className="text-[10px] text-gray-500 block mt-0.5">Shopping experience</span>
+            <span className="text-[10px] font-mono text-gray-400 block mt-1">{DEMO_CUSTOMER.email}</span>
+          </button>
+        </div>
+
+        {/* Navigation to other portals */}
+        <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-xs font-medium text-amber-900 mb-3">Are you a...</p>
+          <div className="space-y-2 text-sm">
+            <Link href="/pandit/login" className="block px-3 py-2 rounded-lg bg-white border border-amber-200 hover:bg-amber-50 text-amber-900 font-medium transition-colors text-center">🙏 Pandit? Go to Pandit Portal</Link>
+            <Link href="/seller/login" className="block px-3 py-2 rounded-lg bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-900 font-medium transition-colors text-center">🏪 Seller? Go to Seller Portal</Link>
+            <Link href="/admin/login" className="block px-3 py-2 rounded-lg bg-white border border-violet-200 hover:bg-violet-50 text-violet-900 font-medium transition-colors text-center">👑 Admin? Go to Admin Portal</Link>
           </div>
         </div>
       </div>

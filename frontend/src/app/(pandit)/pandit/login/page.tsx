@@ -1,8 +1,11 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
+
+const DEMO_PANDIT = { email: 'pandit@pooja.com', pw: 'pandit123' };
 
 export default function PanditLoginPage() {
   const [email, setEmail] = useState('');
@@ -15,7 +18,8 @@ export default function PanditLoginPage() {
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setLoading(true);
+    e.preventDefault(); 
+    setLoading(true);
     try {
       if (isRegister) {
         await register({ name, email, phone, password, role: 'PANDIT' });
@@ -23,7 +27,11 @@ export default function PanditLoginPage() {
       } else {
         await login(email, password);
         const { user } = useAuthStore.getState();
-        if (user?.role !== 'PANDIT') { toast.error('Not a pandit account.'); useAuthStore.getState().logout(); setLoading(false); return; }
+        if (user?.role !== 'PANDIT') { 
+          toast.error('This portal is for pandits only. Please use the appropriate login portal for your role.'); 
+          useAuthStore.getState().logout(); 
+          return; 
+        }
         toast.success('Namaste, Pandit ji!');
       }
       router.push('/pandit');
@@ -60,12 +68,28 @@ export default function PanditLoginPage() {
               {loading ? 'Please wait...' : isRegister ? 'Join as Pandit' : 'Sign In'}
             </button>
           </form>
-          <button onClick={() => { setEmail('pandit@pooja.com'); setPassword('pandit123'); }}
-            className="w-full mt-3 py-2 rounded-xl text-xs text-amber-600 hover:bg-amber-50 transition-colors">
-            Demo: pandit@pooja.com / pandit123
-          </button>
+          <div className="mt-6 pt-6 border-t border-amber-100">
+            <p className="text-xs text-gray-500 mb-3">Demo pandit account</p>
+            <button onClick={() => { setEmail(DEMO_PANDIT.email); setPassword(DEMO_PANDIT.pw); }}
+              className="w-full py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-xs hover:bg-amber-100 transition-colors">
+              🙏 Pandit Demo
+              <br/>
+              <span className="text-[10px] font-mono text-amber-700">{DEMO_PANDIT.email}</span>
+            </button>
+          </div>
         </div>
-        <p className="text-center text-gray-400 text-xs mt-6"><a href="/" className="hover:text-gray-600">← Back to Store</a></p>
+
+        {/* Navigation to other portals */}
+        <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-xs font-medium text-amber-900 mb-3">Other portals:</p>
+          <div className="space-y-2 text-xs">
+            <Link href="/auth/login" className="block px-3 py-2 rounded-lg bg-white border border-blue-200 hover:bg-blue-50 text-blue-900 font-medium transition-colors text-center">🙏 Customer Portal</Link>
+            <Link href="/seller/login" className="block px-3 py-2 rounded-lg bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-900 font-medium transition-colors text-center">🏪 Seller Portal</Link>
+            <Link href="/admin/login" className="block px-3 py-2 rounded-lg bg-white border border-violet-200 hover:bg-violet-50 text-violet-900 font-medium transition-colors text-center">👑 Admin Portal</Link>
+          </div>
+        </div>
+
+        <p className="text-center text-gray-400 text-xs mt-6"><Link href="/" className="hover:text-gray-600">← Back to Store</Link></p>
       </div>
     </div>
   );

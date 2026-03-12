@@ -1,8 +1,19 @@
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /workspace
-COPY . .
+
+# Copy gradle wrapper first (essential for build)
+COPY gradlew .
+COPY gradle gradle/
+COPY gradle.properties .
+COPY settings.gradle.kts .
+COPY build.gradle.kts .
+
+# Copy service-specific files
+COPY pandit-service/build.gradle.kts pandit-service/
+COPY pandit-service/src pandit-service/src/
+
 RUN chmod +x gradlew
-RUN ./gradlew :pandit-service:bootJar
+RUN ./gradlew :pandit-service:bootJar --no-daemon -Dorg.gradle.jvmargs="-Xmx512m -XX:MaxMetaspaceSize=256m"
 
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

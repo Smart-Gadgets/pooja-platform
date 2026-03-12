@@ -10,8 +10,8 @@ spring:
     password: ${DB_PASSWORD:pooja_secret}
   flyway:
     enabled: true
-    schemas: rag
     locations: classpath:db/migration
+    create-schemas: true
   ai:
     openai:
       api-key: ${OPENAI_API_KEY:sk-placeholder-replace-with-real-key}

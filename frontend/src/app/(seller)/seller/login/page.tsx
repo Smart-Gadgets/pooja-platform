@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
 
+const DEMO_SELLER = { email: 'seller@pooja.com', pw: 'seller123' };
+
 export default function SellerLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +18,8 @@ export default function SellerLoginPage() {
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setLoading(true);
+    e.preventDefault(); 
+    setLoading(true);
     try {
       if (isRegister) {
         await register({ name, email, phone, password, role: 'SELLER' });
@@ -24,7 +27,11 @@ export default function SellerLoginPage() {
       } else {
         await login(email, password);
         const { user } = useAuthStore.getState();
-        if (user?.role !== 'SELLER') { toast.error('Not a seller account. Use the correct portal.'); useAuthStore.getState().logout(); setLoading(false); return; }
+        if (user?.role !== 'SELLER') { 
+          toast.error('This portal is for sellers only. Please use the appropriate login portal for your role.'); 
+          useAuthStore.getState().logout(); 
+          return; 
+        }
         toast.success('Welcome to Seller Central');
       }
       router.push('/seller');
@@ -61,12 +68,28 @@ export default function SellerLoginPage() {
               {loading ? 'Please wait...' : isRegister ? 'Create Seller Account' : 'Sign In'}
             </button>
           </form>
-          <button onClick={() => { setEmail('seller@pooja.com'); setPassword('seller123'); }}
-            className="w-full mt-3 py-2 rounded-xl text-xs text-emerald-600 hover:bg-emerald-50 transition-colors">
-            Demo: seller@pooja.com / seller123
-          </button>
+          <div className="mt-6 pt-6 border-t border-emerald-100">
+            <p className="text-xs text-gray-500 mb-3">Demo seller account</p>
+            <button onClick={() => { setEmail(DEMO_SELLER.email); setPassword(DEMO_SELLER.pw); }}
+              className="w-full py-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-900 text-xs hover:bg-emerald-100 transition-colors">
+              🏪 Seller Demo
+              <br/>
+              <span className="text-[10px] font-mono text-emerald-700">{DEMO_SELLER.email}</span>
+            </button>
+          </div>
         </div>
-        <p className="text-center text-gray-400 text-xs mt-6"><a href="/" className="hover:text-gray-600">← Back to Store</a></p>
+
+        {/* Navigation to other portals */}
+        <div className="mt-8 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <p className="text-xs font-medium text-emerald-900 mb-3">Other portals:</p>
+          <div className="space-y-2 text-xs">
+            <Link href="/auth/login" className="block px-3 py-2 rounded-lg bg-white border border-blue-200 hover:bg-blue-50 text-blue-900 font-medium transition-colors text-center">🙏 Customer Portal</Link>
+            <Link href="/pandit/login" className="block px-3 py-2 rounded-lg bg-white border border-amber-200 hover:bg-amber-50 text-amber-900 font-medium transition-colors text-center">🙏 Pandit Portal</Link>
+            <Link href="/admin/login" className="block px-3 py-2 rounded-lg bg-white border border-violet-200 hover:bg-violet-50 text-violet-900 font-medium transition-colors text-center">👑 Admin Portal</Link>
+          </div>
+        </div>
+
+        <p className="text-center text-gray-400 text-xs mt-6"><Link href="/" className="hover:text-gray-600">← Back to Store</Link></p>
       </div>
     </div>
   );

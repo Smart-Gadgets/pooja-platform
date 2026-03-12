@@ -1,8 +1,19 @@
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /workspace
-COPY . .
+
+# Copy gradle wrapper first (essential for build)
+COPY gradlew .
+COPY gradle gradle/
+COPY gradle.properties .
+COPY settings.gradle.kts .
+COPY build.gradle.kts .
+
+# Copy service-specific files
+COPY product-service/build.gradle.kts product-service/
+COPY product-service/src product-service/src/
+
 RUN chmod +x gradlew
-RUN ./gradlew :product-service:bootJar
+RUN ./gradlew :product-service:bootJar --no-daemon -Dorg.gradle.jvmargs="-Xmx512m -XX:MaxMetaspaceSize=256m"
 
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

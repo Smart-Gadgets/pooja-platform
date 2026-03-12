@@ -284,9 +284,29 @@ docker system prune -f       # Clean unused resources
 
 | Problem | Solution |
 |---------|----------|
+| **Docker build OOM** | `make docker-build-low-memory` or increase Docker memory to 6GB+ |
+| **Gradle daemon crashed** | Already fixed — Dockerfiles now use `--no-daemon` with 512MB limit |
 | Containers restarting | Wait 90 seconds — services depend on Kafka/Postgres |
 | Demo accounts don't work | `docker-compose down -v && docker-compose up -d --build` |
 | `useSearchParams` error | Already fixed — use latest `products/page.tsx` |
 | `location is not defined` | Already fixed — checkout uses `useEffect` for redirects |
 | Port 5432 in use | `lsof -i :5432` → kill process or change port in docker-compose |
 | AI images not loading | Pollinations.ai may be slow — images generate on-demand |
+
+### Memory-Constrained Systems (< 8GB RAM)
+
+If `docker-compose up --build` fails with "cannot allocate memory":
+
+```bash
+# Option 1: Build services one-by-one (recommended)
+make docker-build-low-memory
+docker-compose up -d
+
+# Option 2: Increase Docker Desktop memory limit
+# Docker Desktop → Settings → Resources → Memory: 6GB+
+
+# Option 3: Build specific services only
+docker-compose up -d postgres redis kafka  # Infrastructure first
+docker-compose up -d --build api-gateway user-auth-service product-service
+```
+

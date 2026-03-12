@@ -43,6 +43,19 @@ sonar: ## Run SonarQube analysis (set SONAR_TOKEN env var first)
 docker-up: ## Start full stack with Docker Compose
 	docker-compose up -d --build
 
+docker-build-low-memory: ## Build services sequentially to avoid OOM (for systems with <8GB RAM)
+	@echo "🔨 Building services sequentially to prevent memory exhaustion..."
+	docker-compose build --no-cache api-gateway
+	docker-compose build --no-cache user-auth-service
+	docker-compose build --no-cache product-service
+	docker-compose build --no-cache pandit-service
+	docker-compose build --no-cache order-service
+	docker-compose build --no-cache rag-ai-service
+	docker-compose build --no-cache payment-service
+	docker-compose build --no-cache notification-service
+	docker-compose build --no-cache frontend
+	@echo "✅ Build complete. Run 'docker-compose up -d' to start services"
+
 docker-down: ## Stop all containers
 	docker-compose down
 
